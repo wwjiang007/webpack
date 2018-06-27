@@ -31,18 +31,18 @@ it("should answer typeof require.resolve correctly", function() {
 });
 
 it("should not parse filtered stuff", function() {
-	if(typeof require != "function") require("fail");
-	if(typeof require !== "function") require("fail");
-	if(!(typeof require == "function")) require("fail");
-	if(!(typeof require === "function")) require("fail");
-	if(typeof require == "undefined") require = require("fail");
-	if(typeof require === "undefined") require = require("fail");
-	if(typeof require.resolve !== "function") require("fail");
-	if(typeof module == "undefined") module = require("fail");
-	if(typeof module === "undefined") module = require("fail");
-	if(typeof module != "object") module = require("fail");
-	if(typeof exports == "undefined") exports = require("fail");
-	if(typeof System !== "object") exports = require("fail");
-	if(typeof require.include !== "function") require.include("fail");
-	if(typeof require.ensure !== "function") require.ensure(["fail"], function(){});
+	if(typeof require != "function") throw new Error("fail");
+	if(typeof require !== "function") throw new Error("fail");
+	if(!(typeof require == "function")) throw new Error("fail");
+	if(!(typeof require === "function")) throw new Error("fail");
+	if(typeof require == "undefined") throw new Error("fail");
+	if(typeof require === "undefined") throw new Error("fail");
+	if(typeof require.resolve !== "function") throw new Error("fail");
+	if(typeof module == "undefined") throw new Error("fail");
+	if(typeof module === "undefined") throw new Error("fail");
+	if(typeof module != "object") throw new Error("fail");
+	if(typeof exports == "undefined") throw new Error("fail");
+	if(typeof System !== "undefined") throw new Error("fail");
+	if(typeof require.include !== "function") throw new Error("fail");
+	if(typeof require.ensure !== "function") throw new Error("fail")
 });
