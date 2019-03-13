@@ -19,10 +19,10 @@ Watch mode:
 yarn jest --watch ConfigTestCases
 ```
 
-See also: [Jest CLI docs](https://facebook.github.io/jest/docs/cli.html)
+See also: [Jest CLI docs](https://jestjs.io/docs/cli)
 
 ## Test suite overview
-We use Jest for our tests. For more information on Jest you can visit their [homepage](https://facebook.github.io/jest/)!
+We use Jest for our tests. For more information on Jest you can visit their [homepage](https://jestjs.io/)!
 
 ### Class Tests
 All test files can be found in *.test.js. There are many tests that simply test API's of a specific class/file (such as `Compiler`, `Errors`, Integration, `Parser`, `RuleSet`, Validation).
@@ -52,17 +52,17 @@ Basically you don't need to write any expected behaviors your self. The assumpti
 
 Please follow the approach described bellow:
 
-* write your test code in ```statsCases/``` folder by creating a separate folder for it, for example
-```statsCases/some-file-import-stats/index.js```
+* write your test code in `statsCases/` folder by creating a separate folder for it, for example `statsCases/some-file-import-stats/index.js`
+
+```javascript
+import(./someModule);
 ```
-    import(./someModule);
-```
-** dont's forget the ```webpack.config.js```
+* don't forget the `webpack.config.js`
 * run the test
-* jest will automatically add the output from your test code to ```StatsTestCases.test.js.snap``` and you can always check your results there
+* jest will automatically add the output from your test code to `StatsTestCases.test.js.snap` and you can always check your results there
 * Next time test will run -> runner will compare results against your output written to snapshot previously
 
-You can read more about SnapShot testing [right here](https://facebook.github.io/jest/docs/en/snapshot-testing.html)
+You can read more about SnapShot testing [right here](https://jestjs.io/docs/snapshot-testing)
 
 ## Questions? Comments?
 If you are still nervous or don't quite understand, please submit an issue and tag us in it, and provide a relevant PR while working on!
