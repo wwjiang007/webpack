@@ -60,17 +60,17 @@ yarn test:update-snapshots
 ### To run code formatter (prettier) run
 
 ```bash
-yarn pretty
+yarn pretty-lint-fix
 ```
 
 ### To run all linters use
 
 This performs linting on:
 
-* eslint (code-lint script)
-* schema + dependencies (jest-lint script)
-* types (type-lint script)
-* format + generated files (special-lint script)
+- eslint (code-lint script)
+- schema + dependencies (jest-lint script)
+- types (type-lint script)
+- format + generated files (special-lint script)
 
 ```bash
 yarn lint
@@ -86,4 +86,17 @@ or incremental (in watch mode)
 
 ```bash
 yarn type-lint --watch
+```
+
+### To update all examples use
+
+```bash
+yarn build:examples
+```
+
+### To update a specific example use
+
+```bash
+cd examples/<path to example>
+node build.js
 ```

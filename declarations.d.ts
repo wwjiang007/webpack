@@ -1,17 +1,26 @@
 declare module "*.json";
 
-// Deprecated NodeJS API usages in Webpack
+// Deprecated NodeJS API usages in webpack
 declare namespace NodeJS {
 	interface Process {
 		binding(internalModule: string): any;
 	}
+	interface ProcessVersions {
+		pnp: "1" | "3";
+	}
 }
 
 declare module "neo-async" {
+	interface QueueObject<T, E> {
+		push(item: T): void;
+		drain: () => void;
+		error: (err: E) => void;
+	}
+
 	export interface Dictionary<T> {
 		[key: string]: T;
 	}
-	export type IterableCollection<T> = T[] | IterableIterator<T> | Dictionary<T>;
+	export type IterableCollection<T> = T[] | Iterable<T> | Dictionary<T>;
 
 	export interface ErrorCallback<T> {
 		(err?: T): void;
@@ -59,7 +68,7 @@ declare module "neo-async" {
 	}
 
 	export type AsyncAutoTasks<R extends Dictionary<any>, E> = {
-		[K in keyof R]: AsyncAutoTask<R[K], R, E>
+		[K in keyof R]: AsyncAutoTask<R[K], R, E>;
 	};
 	export type AsyncAutoTask<R1, R extends Dictionary<any>, E> =
 		| AsyncAutoTaskFunctionWithoutDependencies<R1, E>
@@ -103,6 +112,11 @@ declare module "neo-async" {
 		tasks: Dictionary<AsyncFunction<T, E>>,
 		callback?: AsyncResultObjectCallback<T, E>
 	): void;
+
+	export function queue<T, E>(
+		worker: AsyncIterator<T, E>,
+		concurrency?: number
+	): QueueObject<T, E>;
 
 	export const forEach: typeof each;
 	export const forEachLimit: typeof eachLimit;
@@ -220,6 +234,7 @@ declare module "@webassemblyjs/ast" {
 		args: string[];
 		result: string[];
 	}
+	export function moduleContextFromModuleAST(ast: any): any;
 
 	// Node matcher
 	export function isGlobalType(n: Node): boolean;
@@ -228,36 +243,156 @@ declare module "@webassemblyjs/ast" {
 	export function isFuncImportDescr(n: Node): boolean;
 }
 
-// This "hack" is needed because typescript doesn't support recursive type definitions
-// It's referenced from "ruleSet-conditions" in schemas/WebpackOptions.json
-interface RuleSetConditionsRecursive
-	extends Array<import("./declarations/WebpackOptions").RuleSetCondition> {}
-interface RuleSetConditionsAbsoluteRecursive
-	extends Array<
-		import("./declarations/WebpackOptions").RuleSetConditionAbsolute
-	> {}
+declare module "webpack-sources" {
+	export type MapOptions = { columns?: boolean; module?: boolean };
 
-/**
- * Global variable declarations
- * @todo Once this issue is resolved, remove these globals and add JSDoc onsite instead
- * https://github.com/Microsoft/TypeScript/issues/15626
- */
-declare const $hash$;
-declare const $requestTimeout$;
-declare const installedModules;
-declare const $require$;
-declare const hotDownloadManifest;
-declare const hotDownloadUpdateChunk;
-declare const hotDisposeChunk;
-declare const modules;
-declare const installedChunks;
-declare const hotAddUpdateChunk;
-declare const parentHotUpdateCallback;
-declare const $hotChunkFilename$;
-declare const $hotMainFilename$;
-declare const WebAssembly;
-declare const importScripts;
-declare const $crossOriginLoading$;
-declare const chunkId;
+	export abstract class Source {
+		size(): number;
+
+		map(options?: MapOptions): Object;
+
+		sourceAndMap(
+			options?: MapOptions
+		): {
+			source: string | Buffer;
+			map: Object;
+		};
+
+		updateHash(hash: import("./lib/util/Hash")): void;
+
+		source(): string | Buffer;
+
+		buffer(): Buffer;
+	}
+
+	export class RawSource extends Source {
+		constructor(source: string | Buffer, convertToString?: boolean);
+
+		isBuffer(): boolean;
+	}
+
+	export class OriginalSource extends Source {
+		constructor(source: string | Buffer, name: string);
+
+		getName(): string;
+	}
+
+	export class ReplaceSource extends Source {
+		constructor(source: Source, name?: string);
+
+		replace(start: number, end: number, newValue: string, name?: string): void;
+		insert(pos: number, newValue: string, name?: string): void;
+
+		getName(): string;
+		original(): string;
+		getReplacements(): {
+			start: number;
+			end: number;
+			content: string;
+			insertIndex: number;
+			name: string;
+		}[];
+	}
+
+	export class SourceMapSource extends Source {
+		constructor(
+			source: string | Buffer,
+			name: string,
+			sourceMap: Object | string | Buffer,
+			originalSource?: string | Buffer,
+			innerSourceMap?: Object | string | Buffer,
+			removeOriginalSource?: boolean
+		);
+
+		getArgsAsBuffers(): [
+			Buffer,
+			string,
+			Buffer,
+			Buffer | undefined,
+			Buffer | undefined,
+			boolean
+		];
+	}
+
+	export class ConcatSource extends Source {
+		constructor(...args: (string | Source)[]);
+
+		getChildren(): Source[];
+
+		add(item: string | Source): void;
+		addAllSkipOptimizing(items: Source[]): void;
+	}
+
+	export class PrefixSource extends Source {
+		constructor(prefix: string, source: string | Source);
+
+		original(): Source;
+		getPrefix(): string;
+	}
+
+	export class CachedSource extends Source {
+		constructor(source: Source);
+		constructor(source: Source | (() => Source), cachedData?: any);
+
+		original(): Source;
+		originalLazy(): Source | (() => Source);
+		getCachedData(): any;
+	}
+
+	export class SizeOnlySource extends Source {
+		constructor(size: number);
+	}
+
+	interface SourceLike {
+		source(): string | Buffer;
+	}
+
+	export class CompatSource extends Source {
+		constructor(sourceLike: SourceLike);
+
+		static from(sourceLike: SourceLike): Source;
+	}
+}
+
+declare module "browserslist" {
+	function browserslist(query: string): string[] | undefined;
+	namespace browserslist {
+		export function loadConfig(
+			options:
+				| {
+						config: string;
+						env?: string;
+				  }
+				| {
+						path: string;
+						env?: string;
+				  }
+		): string | undefined;
+		export function findConfig(path: string): Record<string, string[]>;
+	}
+	export = browserslist;
+}
+
+// TODO remove that when @types/estree is updated
+declare type PrivateIdentifierNode = {
+	type: "PrivateIdentifier";
+	name: string;
+	loc?: import("estree").SourceLocation | null;
+	range?: [number, number];
+};
+declare type PropertyDefinitionNode = {
+	type: "PropertyDefinition";
+	key: import("estree").Expression | PrivateIdentifierNode;
+	value: import("estree").Expression | null;
+	computed: boolean;
+	static: boolean;
+	loc?: import("estree").SourceLocation | null;
+	range?: [number, number];
+};
 
 type TODO = any;
+
+type RecursiveArrayOrRecord<T> =
+	| { [index: string]: RecursiveArrayOrRecord<T> }
+	| Array<RecursiveArrayOrRecord<T>>
+	| T;

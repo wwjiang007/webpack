@@ -1,11 +1,8 @@
-const MinChunkSizePlugin = require("../../../lib/optimize/MinChunkSizePlugin");
+const { MinChunkSizePlugin } = require("../../../").optimize;
 
 const baseConfig = {
 	mode: "production",
 	target: "web",
-	output: {
-		filename: "[name].js"
-	},
 	stats: {
 		hash: false,
 		timings: false,
@@ -18,7 +15,11 @@ const baseConfig = {
 	]
 };
 
-const withoutNamedEntry = Object.assign({}, baseConfig, {
+const withoutNamedEntry = {
+	...baseConfig,
+	output: {
+		filename: "without-[name].js"
+	},
 	name: "base",
 	entry: {
 		main1: "./main1"
@@ -26,19 +27,43 @@ const withoutNamedEntry = Object.assign({}, baseConfig, {
 	optimization: {
 		runtimeChunk: "single"
 	}
-});
+};
 
-const withNamedEntry = Object.assign({}, baseConfig, {
-	name: "manifest is named entry",
+const withNamedEntry = {
+	...baseConfig,
+	output: {
+		filename: "with-[name].js"
+	},
+	name: "static custom name",
 	entry: {
 		main1: "./main1",
-		manifest: "./f"
+		main2: "./main2",
+		main3: "./main3"
 	},
 	optimization: {
 		runtimeChunk: {
 			name: "manifest"
 		}
 	}
-});
+};
 
-module.exports = [withoutNamedEntry, withNamedEntry];
+const withFunctionEntry = {
+	...baseConfig,
+	output: {
+		filename: "func-[name].js"
+	},
+	name: "dynamic custom name",
+	entry: {
+		main1: "./main1",
+		main2: "./main2",
+		main3: "./main3"
+	},
+	optimization: {
+		runtimeChunk: {
+			name: ({ name }) => (name === "main3" ? "a" : "b")
+		}
+	}
+};
+
+/** @type {import("../../../").Configuration[]} */
+module.exports = [withoutNamedEntry, withNamedEntry, withFunctionEntry];

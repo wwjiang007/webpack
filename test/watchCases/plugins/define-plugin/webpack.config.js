@@ -5,6 +5,7 @@ const valueFile = path.resolve(
 	__dirname,
 	"../../../js/watch-src/plugins/define-plugin/value.txt"
 );
+/** @type {import("../../../../").Configuration} */
 module.exports = {
 	plugins: [
 		new webpack.DefinePlugin({
@@ -16,7 +17,23 @@ module.exports = {
 			}, []),
 			TEST_VALUE3: webpack.DefinePlugin.runtimeValue(() => {
 				return JSON.stringify(fs.readFileSync(valueFile, "utf-8").trim());
-			}, true)
+			}, true),
+			TEST_VALUE4: webpack.DefinePlugin.runtimeValue(
+				() => {
+					return JSON.stringify(fs.readFileSync(valueFile, "utf-8").trim());
+				},
+				{
+					fileDependencies: [valueFile]
+				}
+			),
+			TEST_VALUE5: webpack.DefinePlugin.runtimeValue(
+				({ version, key }) => {
+					return JSON.stringify({ version, key });
+				},
+				{
+					version: () => fs.readFileSync(valueFile, "utf-8").trim()
+				}
+			)
 		})
 	]
 };
